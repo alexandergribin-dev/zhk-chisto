@@ -52,7 +52,16 @@ const Hero = () => {
       </div>
 
       <div className="h-[260px] animate-fade-in [animation-delay:120ms] sm:h-[320px] lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:h-auto lg:min-h-[420px]">
-        <EcoMap />
+        <div className="relative h-full">
+          <EcoMap />
+          <Link
+            to="/novostroyki?vid=karta"
+            className="absolute right-3 top-3 z-[600] inline-flex h-10 items-center gap-2 rounded-full bg-card px-4 text-[0.9rem] font-semibold text-primary shadow-soft transition-transform hover:-translate-y-px"
+          >
+            <Icon name="Map" size={16} />
+            Открыть на карте
+          </Link>
+        </div>
       </div>
 
       <div className="dot-grid min-w-0 animate-fade-in lg:col-start-1 lg:row-span-2 lg:row-start-2 rounded-[22px] bg-primary p-3 [animation-delay:200ms] md:p-4">
