@@ -31,84 +31,60 @@ const WindRose = ({ z }: { z: Zhk }) => {
     return `M${C} ${C} L${x1} ${y1} A${r} ${r} 0 0 1 ${x2} ${y2} Z`;
   };
 
-  const radar = z.wind.map((v, i) => pt(i * 45, (v / scale) * MAX_R).join(",")).join(" ");
-
   return (
     <div className="grid items-center gap-8 md:grid-cols-[minmax(0,360px)_1fr]">
       <div className="relative mx-auto w-full max-w-[360px]">
         <svg viewBox="0 0 320 320" className="block h-auto w-full" role="img" aria-label="Роза ветров">
-          <defs>
-            <radialGradient id="wr-clean" cx={C} cy={C} r={MAX_R} gradientUnits="userSpaceOnUse">
-              <stop offset="0" stopColor="hsl(var(--primary))" stopOpacity="0.95" />
-              <stop offset="1" stopColor="hsl(var(--grade-a))" stopOpacity="0.6" />
-            </radialGradient>
-            <radialGradient id="wr-risk" cx={C} cy={C} r={MAX_R} gradientUnits="userSpaceOnUse">
-              <stop offset="0" stopColor="hsl(var(--grade-d))" stopOpacity="0.95" />
-              <stop offset="1" stopColor="hsl(var(--grade-c))" stopOpacity="0.65" />
-            </radialGradient>
-            <radialGradient id="wr-bg" cx="50%" cy="50%" r="50%">
-              <stop offset="0" stopColor="hsl(var(--card))" />
-              <stop offset="1" stopColor="hsl(var(--secondary))" />
-            </radialGradient>
-          </defs>
-
-          <circle cx={C} cy={C} r={MAX_R + 30} fill="url(#wr-bg)" className="stroke-border" />
-
-          {Array.from({ length: 72 }).map((_, k) => {
-            const long = k % 9 === 0;
-            const [x1, y1] = pt(k * 5, MAX_R + 30);
-            const [x2, y2] = pt(k * 5, MAX_R + (long ? 21 : 25));
-            return <line key={k} x1={x1} y1={y1} x2={x2} y2={y2} className="stroke-foreground/25" strokeWidth={long ? 1.4 : 0.8} />;
-          })}
+          <circle cx={C} cy={C} r={MAX_R + 24} className="fill-muted" />
 
           {rings.map((k) => (
-            <circle key={k} cx={C} cy={C} r={MAX_R * k} fill="none" className="stroke-foreground/15" strokeDasharray={k === 1 ? undefined : "3 4"} />
+            <circle key={k} cx={C} cy={C} r={MAX_R * k} fill="none" className="stroke-border" strokeWidth="1.2" />
           ))}
           {DIRS.map((_, i) => {
             const [x, y] = pt(i * 45, MAX_R);
-            return <line key={i} x1={C} y1={C} x2={x} y2={y} className="stroke-foreground/10" />;
+            return <line key={i} x1={C} y1={C} x2={x} y2={y} className="stroke-border" />;
           })}
 
           {[...sourceDirs].map((d) => {
             const [x1, y1] = pt(d * 45 - 22.5, MAX_R);
             const [x2, y2] = pt(d * 45 + 22.5, MAX_R);
-            return <path key={d} d={`M${C} ${C} L${x1} ${y1} A${MAX_R} ${MAX_R} 0 0 1 ${x2} ${y2} Z`} className="fill-grade-d/[0.08]" />;
+            return <path key={d} d={`M${C} ${C} L${x1} ${y1} A${MAX_R} ${MAX_R} 0 0 1 ${x2} ${y2} Z`} className="fill-grade-d/10" />;
           })}
 
           {DIRS.map((_, i) => (
             <path
               key={i}
               d={petal(i)}
-              fill={sourceDirs.has(i) ? "url(#wr-risk)" : "url(#wr-clean)"}
-              stroke="white"
-              strokeWidth="1.5"
+              stroke="hsl(var(--muted))"
+              strokeWidth="2"
               onMouseEnter={() => setHover(i)}
               onMouseLeave={() => setHover(null)}
               onClick={() => setHover(i)}
-              className={cn("rose-petal cursor-pointer transition-opacity duration-200", hover !== null && hover !== i && "opacity-35")}
-              style={{ transformOrigin: `${C}px ${C}px`, animationDelay: `${i * 60}ms` }}
+              className={cn(
+                "cursor-pointer transition-opacity duration-200",
+                sourceDirs.has(i) ? "fill-grade-d" : "fill-primary",
+                hover !== null && hover !== i && "opacity-30",
+              )}
             />
           ))}
 
-          <polygon points={radar} fill="none" className="pointer-events-none stroke-foreground/45" strokeWidth="1.2" strokeDasharray="2 3" />
-
-          {rings.map((k) => (
+          {rings.slice(1).map((k) => (
             <text key={k} x={C + 4} y={C - MAX_R * k + 11} className="pointer-events-none fill-muted-foreground text-[9px] font-medium">
               {Math.round(scale * k)}%
             </text>
           ))}
 
           {sources.map((s) => {
-            const [x, y] = pt(s.angle, MAX_R - 4);
-            return <circle key={s.id} cx={x} cy={y} r="5" className="pointer-events-none fill-grade-d stroke-white" strokeWidth="1.5" />;
+            const [x, y] = pt(s.angle, MAX_R + 6);
+            return <circle key={s.id} cx={x} cy={y} r="4.5" className="pointer-events-none fill-grade-d stroke-card" strokeWidth="2" />;
           })}
 
           {DIRS.map((d, i) => {
-            const [x, y] = pt(i * 45, MAX_R + 12);
+            const [x, y] = pt(i * 45, MAX_R + 24);
             const on = i === active;
             return (
               <g key={d} className="cursor-pointer" onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}>
-                <circle cx={x} cy={y} r="11.5" className={on ? "fill-primary" : "fill-card stroke-border"} />
+                <circle cx={x} cy={y} r="11.5" className={on ? "fill-primary" : "fill-card"} />
                 <text x={x} y={y + 3.8} textAnchor="middle" className={cn("text-[10.5px] font-bold", on ? "fill-white" : "fill-foreground")}>
                   {d}
                 </text>
@@ -116,7 +92,7 @@ const WindRose = ({ z }: { z: Zhk }) => {
             );
           })}
 
-          <circle cx={C} cy={C} r="16" className="fill-card stroke-border" />
+          <circle cx={C} cy={C} r="15" className="fill-card" />
           <path d={`M${C} ${C - 8} l6 7 h-3.5 v8 h-5 v-8 h-3.5 Z`} className="fill-primary" />
         </svg>
 
