@@ -55,7 +55,8 @@ const Hero = () => {
         <div className="relative h-full">
           <EcoMap />
           <Link
-            to="/novostroyki?vid=karta"
+            to={`/novostroyki?vid=karta&podborka=${active}`}
+            title={`Открыть подборку «${collections.find((c) => c.id === active)?.title}» на карте`}
             className="absolute right-3 top-3 z-[600] inline-flex h-10 items-center gap-2 rounded-full bg-card px-4 text-[0.9rem] font-semibold text-primary shadow-soft transition-transform hover:-translate-y-px"
           >
             <Icon name="Map" size={16} />
