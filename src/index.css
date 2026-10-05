@@ -156,3 +156,54 @@
     background: linear-gradient(100deg, hsl(25 74% 66%), hsl(173 46% 33%));
   }
 }
+
+.eco-map {
+  background: hsl(var(--secondary));
+  font-family: inherit;
+}
+.eco-pin {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: 0 0 0 2px #fff, 0 4px 10px rgb(0 0 0 / 0.25);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.eco-pin:hover {
+  transform: rotate(-45deg) scale(1.15);
+}
+.eco-pin b {
+  transform: rotate(45deg);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+.leaflet-tooltip.eco-tip {
+  border: 0;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: hsl(var(--foreground));
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.18);
+}
+
+@keyframes rose-grow {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.rose-petal {
+  animation: rose-grow 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.eco-tiles {
+  filter: grayscale(0.85) sepia(0.15) hue-rotate(120deg) brightness(1.04) contrast(0.92);
+}

@@ -2,49 +2,9 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import ZhkCard from "@/components/ZhkCard";
-import { gradeBg } from "@/components/GradeBadge";
+import EcoMap from "@/components/home/EcoMap";
 import { collections, zhkList } from "@/data/zhk";
 import { cn } from "@/lib/utils";
-
-const pins = [
-  [22, 30], [48, 20], [72, 28], [36, 55], [62, 46], [84, 56], [28, 76], [54, 72], [76, 80], [44, 36], [66, 64], [88, 30],
-];
-
-const EcoMap = () => (
-  <div className="dot-grid relative h-full overflow-hidden rounded-[22px] bg-primary">
-    <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-      <path d="M0 62 C 25 55, 40 70, 60 58 S 90 40, 100 46" fill="none" stroke="hsl(0 0% 100% / .14)" strokeWidth="0.6" />
-      <path d="M30 0 C 34 30, 26 60, 40 100" fill="none" stroke="hsl(0 0% 100% / .1)" strokeWidth="0.5" />
-    </svg>
-    {zhkList.slice(0, pins.length).map((z, i) => (
-      <Link
-        key={z.slug}
-        to={`/zhk/${z.slug}`}
-        title={`${z.name} — оценка ${z.grade}`}
-        aria-label={`${z.name}, эко-оценка ${z.grade}`}
-        style={{ left: `${pins[i][0]}%`, top: `${pins[i][1]}%` }}
-        className="group absolute -translate-x-1/2 -translate-y-full"
-      >
-        <span
-          className={cn(
-            "grid h-7 w-7 -rotate-45 place-items-center rounded-full rounded-bl-none text-[11px] font-bold text-white ring-2 ring-white/90 transition-transform group-hover:scale-110",
-            gradeBg[z.grade],
-          )}
-        >
-          <span className="rotate-45">{z.grade}</span>
-        </span>
-      </Link>
-    ))}
-    <div className="absolute bottom-3 left-3 flex gap-2.5 rounded-lg bg-primary/85 px-2.5 py-1.5 text-[11px] font-medium text-white/90">
-      {(["A", "B", "C", "D"] as const).map((g) => (
-        <span key={g} className="flex items-center gap-1">
-          <i className={cn("h-2.5 w-2.5 rounded-full", gradeBg[g])} />
-          {g}
-        </span>
-      ))}
-    </div>
-  </div>
-);
 
 const Hero = () => {
   const [q, setQ] = useState("");

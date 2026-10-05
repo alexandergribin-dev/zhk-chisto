@@ -36,6 +36,7 @@ export type Zhk = {
   name: string;
   district: string;
   okrug: string;
+  coords: [number, number];
   metro: string;
   developer: string;
   grade: Grade;
@@ -96,6 +97,7 @@ export const zhkList: Zhk[] = [
     name: "ЖК Лесная Ривьера",
     district: "Новомосковский",
     okrug: "НАО",
+    coords: [55.5905, 37.461],
     metro: "Саларьево, 12 мин на авто",
     developer: "samolet",
     grade: "A",
@@ -124,6 +126,7 @@ export const zhkList: Zhk[] = [
     name: "ЖК Сосновый квартал",
     district: "Красногорск",
     okrug: "МО, запад",
+    coords: [55.824, 37.33],
     metro: "Мякинино, 15 мин пешком",
     developer: "fsk",
     grade: "A",
@@ -151,6 +154,7 @@ export const zhkList: Zhk[] = [
     name: "ЖК Тихий берег",
     district: "Хорошёво-Мнёвники",
     okrug: "СЗАО",
+    coords: [55.7775, 37.471],
     metro: "Народное Ополчение, 9 мин",
     developer: "level",
     grade: "B",
@@ -178,6 +182,7 @@ export const zhkList: Zhk[] = [
     name: "ЖК Берёзовый парк",
     district: "Мытищи",
     okrug: "МО, север",
+    coords: [55.918, 37.765],
     metro: "Медведково, 20 мин на авто",
     developer: "brusnika",
     grade: "A",
@@ -205,6 +210,7 @@ export const zhkList: Zhk[] = [
     name: "ЖК Западные окна",
     district: "Одинцово",
     okrug: "МО, запад",
+    coords: [55.679, 37.272],
     metro: "Одинцово (МЦД-1), 8 мин",
     developer: "samolet",
     grade: "B",
@@ -232,6 +238,7 @@ export const zhkList: Zhk[] = [
     name: "ЖК Южные сады",
     district: "Видное",
     okrug: "МО, юг",
+    coords: [55.553, 37.709],
     metro: "Домодедовская, 18 мин на авто",
     developer: "granel",
     grade: "C",
@@ -259,6 +266,7 @@ export const zhkList: Zhk[] = [
     name: "ЖК Остров Мечты",
     district: "Нагатинский Затон",
     okrug: "ЮАО",
+    coords: [55.695, 37.684],
     metro: "Технопарк, 11 мин",
     developer: "fsk",
     grade: "B",
@@ -286,6 +294,7 @@ export const zhkList: Zhk[] = [
     name: "ЖК Промышленный квартал",
     district: "Люблино",
     okrug: "ЮВАО",
+    coords: [55.68, 37.765],
     metro: "Люблино, 14 мин",
     developer: "mic",
     grade: "D",
@@ -313,6 +322,7 @@ export const zhkList: Zhk[] = [
     name: "ЖК Зелёная гавань",
     district: "Пушкино",
     okrug: "МО, северо-восток",
+    coords: [56.011, 37.847],
     metro: "Пушкино (ж/д), 10 мин",
     developer: "granel",
     grade: "A",
@@ -339,6 +349,7 @@ export const zhkList: Zhk[] = [
     name: "ЖК Солнечный склон",
     district: "Солнцево",
     okrug: "ЗАО",
+    coords: [55.65, 37.404],
     metro: "Солнцево, 7 мин",
     developer: "level",
     grade: "B",
@@ -365,6 +376,7 @@ export const zhkList: Zhk[] = [
     name: "ЖК Речной бульвар",
     district: "Химки",
     okrug: "МО, северо-запад",
+    coords: [55.889, 37.445],
     metro: "Ховрино, 16 мин на авто",
     developer: "samolet",
     grade: "C",
@@ -392,6 +404,7 @@ export const zhkList: Zhk[] = [
     name: "ЖК Кедровый",
     district: "Ленинский",
     okrug: "МО, юг",
+    coords: [55.52, 37.77],
     metro: "Бульвар Дм. Донского, 22 мин на авто",
     developer: "brusnika",
     grade: "A",
