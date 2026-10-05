@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import Layout from "@/components/Layout";
 import ZhkCard from "@/components/ZhkCard";
+import CatalogMap from "@/components/catalog/CatalogMap";
 import Filters, { defaultFilters, type FilterState } from "@/components/catalog/Filters";
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -57,6 +58,14 @@ const Catalog = () => {
   const [q, setQ] = useState(params.get("q") ?? "");
   const [sort, setSort] = useState("grade");
   const page = Math.max(1, Number(params.get("page") ?? 1));
+  const view = params.get("vid") === "karta" ? "map" : "list";
+  const setView = (v: "list" | "map") => {
+    const n = new URLSearchParams(params);
+    if (v === "map") n.set("vid", "karta");
+    else n.delete("vid");
+    n.delete("page");
+    setParams(n, { replace: true });
+  };
   const col = collections.find((c) => c.id === podborka);
 
   useEffect(() => {
@@ -163,6 +172,26 @@ const Catalog = () => {
                   </div>
                 </SheetContent>
               </Sheet>
+              <div className="flex h-11 flex-1 rounded-lg bg-card p-1 shadow-line sm:flex-none" role="tablist" aria-label="Вид">
+                {([
+                  { v: "list", l: "Список", i: "LayoutGrid" },
+                  { v: "map", l: "Карта", i: "Map" },
+                ] as const).map((o) => (
+                  <button
+                    key={o.v}
+                    role="tab"
+                    aria-selected={view === o.v}
+                    onClick={() => setView(o.v)}
+                    className={cn(
+                      "inline-flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 text-sm font-semibold transition-colors",
+                      view === o.v ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-muted",
+                    )}
+                  >
+                    <Icon name={o.i} size={15} />
+                    {o.l}
+                  </button>
+                ))}
+              </div>
               <Select value={sort} onValueChange={setSort}>
                 <SelectTrigger className="h-11 flex-1 bg-card sm:w-52 sm:flex-none">
                   <SelectValue />
@@ -175,7 +204,9 @@ const Catalog = () => {
               </Select>
             </div>
 
-            {shown.length ? (
+            {result.length && view === "map" ? (
+              <CatalogMap items={result} />
+            ) : shown.length ? (
               <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {shown.map((z) => (
                   <ZhkCard key={z.slug} z={z} wide />
@@ -189,7 +220,7 @@ const Catalog = () => {
               </div>
             )}
 
-            {pages > 1 && (
+            {view === "list" && pages > 1 && (
               <div className="mt-8 flex items-center justify-center gap-1.5">
                 {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
                   <button

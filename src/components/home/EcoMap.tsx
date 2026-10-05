@@ -1,8 +1,9 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapContainer, TileLayer, Marker, Tooltip } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Tooltip, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { zhkList, fmtMln, type Grade } from "@/data/zhk";
+import { zhkList, fmtMln, type Grade, type Zhk } from "@/data/zhk";
 import { cn } from "@/lib/utils";
 
 const gradeColor: Record<Grade, string> = {
@@ -12,20 +13,43 @@ const gradeColor: Record<Grade, string> = {
   D: "hsl(var(--grade-d))",
 };
 
-const icons = Object.fromEntries(
-  (Object.keys(gradeColor) as Grade[]).map((g) => [
-    g,
-    L.divIcon({
-      className: "",
-      iconSize: [30, 30],
-      iconAnchor: [15, 30],
-      tooltipAnchor: [0, -30],
-      html: `<span class="eco-pin" style="background:${gradeColor[g]}"><b>${g}</b></span>`,
-    }),
-  ]),
-) as Record<Grade, L.DivIcon>;
+const makeIcon = (g: Grade, active: boolean) =>
+  L.divIcon({
+    className: "",
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    tooltipAnchor: [0, -30],
+    html: `<span class="eco-pin${active ? " eco-pin-active" : ""}" style="background:${gradeColor[g]}"><b>${g}</b></span>`,
+  });
 
-const EcoMap = ({ className }: { className?: string }) => {
+const icons = Object.fromEntries((Object.keys(gradeColor) as Grade[]).map((g) => [g, makeIcon(g, false)])) as Record<Grade, L.DivIcon>;
+const activeIcons = Object.fromEntries((Object.keys(gradeColor) as Grade[]).map((g) => [g, makeIcon(g, true)])) as Record<Grade, L.DivIcon>;
+
+const FitBounds = ({ items }: { items: Zhk[] }) => {
+  const map = useMap();
+  const key = items.map((z) => z.slug).join(",");
+  useEffect(() => {
+    if (!items.length) return;
+    if (items.length === 1) {
+      map.setView(items[0].coords, 12, { animate: true });
+      return;
+    }
+    map.fitBounds(L.latLngBounds(items.map((z) => z.coords)), { padding: [50, 50], maxZoom: 12, animate: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, map]);
+  return null;
+};
+
+type Props = {
+  className?: string;
+  items?: Zhk[];
+  fit?: boolean;
+  scrollZoom?: boolean;
+  selected?: string | null;
+  onSelect?: (slug: string) => void;
+};
+
+const EcoMap = ({ className, items = zhkList, fit, scrollZoom, selected, onSelect }: Props) => {
   const navigate = useNavigate();
   return (
     <div className={cn("relative isolate h-full overflow-hidden rounded-[22px] bg-primary", className)}>
@@ -33,18 +57,20 @@ const EcoMap = ({ className }: { className?: string }) => {
         center={[55.76, 37.6]}
         zoom={9}
         minZoom={8}
-        maxZoom={15}
-        scrollWheelZoom={false}
+        maxZoom={16}
+        scrollWheelZoom={!!scrollZoom}
         attributionControl={false}
         className="eco-map h-full w-full"
       >
         <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" className="eco-tiles" />
-        {zhkList.map((z) => (
+        {fit && <FitBounds items={items} />}
+        {items.map((z) => (
           <Marker
             key={z.slug}
             position={z.coords}
-            icon={icons[z.grade]}
-            eventHandlers={{ click: () => navigate(`/zhk/${z.slug}`) }}
+            icon={selected === z.slug ? activeIcons[z.grade] : icons[z.grade]}
+            zIndexOffset={selected === z.slug ? 1000 : 0}
+            eventHandlers={{ click: () => (onSelect ? onSelect(z.slug) : navigate(`/zhk/${z.slug}`)) }}
           >
             <Tooltip direction="top" className="eco-tip">
               <b>{z.name}</b>
