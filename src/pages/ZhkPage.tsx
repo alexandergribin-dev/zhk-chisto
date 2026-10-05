@@ -3,6 +3,7 @@ import Layout from "@/components/Layout";
 import GradeBadge from "@/components/GradeBadge";
 import SurroundingsMap from "@/components/zhk/SurroundingsMap";
 import WindRose from "@/components/zhk/WindRose";
+import AirFlow from "@/components/zhk/AirFlow";
 import LotsTable from "@/components/zhk/LotsTable";
 import ZhkCard from "@/components/ZhkCard";
 import { Button } from "@/components/ui/button";
@@ -131,6 +132,7 @@ const ZhkPage = () => {
         <nav className="sticky top-0 z-20 -mx-4 mt-8 flex gap-1 overflow-x-auto border-b border-border bg-background/90 px-4 py-2 backdrop-blur md:mx-0 md:px-0">
           {[
             ["okruzhenie", "Что рядом"],
+            ["vozduh", "Воздух"],
             ["veter", "Роза ветров"],
             ["zastroyshchik", "Застройщик"],
             ["kvartiry", "Квартиры"],
@@ -144,6 +146,12 @@ const ZhkPage = () => {
 
         <Section id="okruzhenie" title="Что рядом" sub="Кольца 300 м и 1 км от дома. Нажмите на точку, чтобы узнать подробности.">
           <SurroundingsMap z={z} />
+        </Section>
+
+        <Section id="vozduh" title="Откуда приходит воздух" sub="Объекты вокруг дома и то, как часто ветер несёт от них воздух к окнам.">
+          <div className="rounded-xl bg-card p-4 shadow-line md:p-6">
+            <AirFlow z={z} />
+          </div>
         </Section>
 
         <Section id="veter" title="Роза ветров" sub="Откуда чаще дует ветер и что он приносит к окнам.">

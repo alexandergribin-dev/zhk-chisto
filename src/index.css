@@ -235,3 +235,21 @@
     opacity: 0;
   }
 }
+.smoke-up {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: smoke-rise 2.4s ease-out infinite;
+}
+@keyframes smoke-rise {
+  0% {
+    transform: translateY(6px) scale(0.6);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-14px) scale(1.4);
+    opacity: 0;
+  }
+}
