@@ -47,9 +47,10 @@ type Props = {
   scrollZoom?: boolean;
   selected?: string | null;
   onSelect?: (slug: string) => void;
+  children?: React.ReactNode;
 };
 
-const EcoMap = ({ className, items = zhkList, fit, scrollZoom, selected, onSelect }: Props) => {
+const EcoMap = ({ className, items = zhkList, fit, scrollZoom, selected, onSelect, children }: Props) => {
   const navigate = useNavigate();
   return (
     <div className={cn("relative isolate h-full overflow-hidden rounded-[22px] bg-primary", className)}>
@@ -63,6 +64,7 @@ const EcoMap = ({ className, items = zhkList, fit, scrollZoom, selected, onSelec
         className="eco-map h-full w-full"
       >
         <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" className="eco-tiles" />
+        {children}
         {fit && <FitBounds items={items} />}
         {items.map((z) => (
           <Marker
