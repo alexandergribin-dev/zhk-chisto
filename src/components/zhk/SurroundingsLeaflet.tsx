@@ -1,21 +1,73 @@
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Circle, Tooltip } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Circle,
+  Tooltip,
+  useMap,
+} from "react-leaflet";
+import Icon from "@/components/ui/icon";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import EcoLayers, { type LayerId } from "@/components/map/EcoLayers";
 import LayersPanel from "@/components/map/LayersPanel";
-import type { Zhk } from "@/data/zhk";
+import FactorHighlight from "@/components/map/FactorHighlight";
+import type { Factor, Zhk } from "@/data/zhk";
 
-const gradeVar = { A: "--grade-a", B: "--grade-b", C: "--grade-c", D: "--grade-d" } as const;
+const gradeVar = {
+  A: "--grade-a",
+  B: "--grade-b",
+  C: "--grade-c",
+  D: "--grade-d",
+} as const;
 
-const SurroundingsLeaflet = ({ z }: { z: Zhk }) => {
-  const [layers, setLayers] = useState<LayerId[]>(["green", "industry", "roads", "metro"]);
+const ResetView = ({
+  center,
+  signal,
+}: {
+  center: [number, number];
+  signal: number;
+}) => {
+  const map = useMap();
+  useEffect(() => {
+    if (signal) map.flyTo(center, 14, { duration: 0.8 });
+  }, [signal, center, map]);
+  return null;
+};
+
+type Props = {
+  z: Zhk;
+  factor?: Factor | null;
+  zoomTo?: boolean;
+  onReset?: () => void;
+  resetSignal?: number;
+};
+
+const SurroundingsLeaflet = ({
+  z,
+  factor = null,
+  zoomTo = false,
+  onReset,
+  resetSignal = 0,
+}: Props) => {
+  const [layers, setLayers] = useState<LayerId[]>([
+    "green",
+    "industry",
+    "roads",
+    "metro",
+  ]);
   const [open, setOpen] = useState(true);
-  const toggle = (id: LayerId) => setLayers((l) => (l.includes(id) ? l.filter((x) => x !== id) : [...l, id]));
+  const toggle = (id: LayerId) =>
+    setLayers((l) => (l.includes(id) ? l.filter((x) => x !== id) : [...l, id]));
 
   useEffect(() => {
     if (window.matchMedia("(max-width: 767px)").matches) setOpen(false);
   }, []);
+
+  useEffect(() => {
+    if (factor) setOpen(false);
+  }, [factor]);
 
   const icon = L.divIcon({
     className: "",
@@ -37,10 +89,35 @@ const SurroundingsLeaflet = ({ z }: { z: Zhk }) => {
         attributionControl={false}
         className="eco-map h-full w-full"
       >
-        <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" className="eco-tiles" />
+        <TileLayer
+          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+          className="eco-tiles"
+        />
         <EcoLayers layers={layers} detailAround={z.coords} />
-        <Circle center={z.coords} radius={1000} interactive={false} pathOptions={{ color: "#0f3d33", weight: 1.5, dashArray: "5 6", fill: false }} />
-        <Circle center={z.coords} radius={300} interactive={false} pathOptions={{ color: "#0f3d33", weight: 1.5, fillColor: "#0f3d33", fillOpacity: 0.08 }} />
+        <Circle
+          center={z.coords}
+          radius={1000}
+          interactive={false}
+          pathOptions={{
+            color: "#0f3d33",
+            weight: 1.5,
+            dashArray: "5 6",
+            fill: false,
+          }}
+        />
+        <Circle
+          center={z.coords}
+          radius={300}
+          interactive={false}
+          pathOptions={{
+            color: "#0f3d33",
+            weight: 1.5,
+            fillColor: "#0f3d33",
+            fillOpacity: 0.08,
+          }}
+        />
+        <ResetView center={z.coords} signal={resetSignal} />
+        <FactorHighlight factor={factor} home={z.coords} zoomTo={zoomTo} />
         <Marker position={z.coords} icon={icon} zIndexOffset={1000}>
           <Tooltip direction="top" className="eco-tip">
             <b>{z.name}</b>
@@ -55,7 +132,18 @@ const SurroundingsLeaflet = ({ z }: { z: Zhk }) => {
         radiusNote="Круги — 300 м и 1 км от дома"
         className="absolute left-14 top-3 z-[600]"
       />
-      <span className="pointer-events-none absolute bottom-1 right-2 z-[500] text-[9px] text-primary/60">© OpenStreetMap</span>
+      {factor && onReset && (
+        <button
+          onClick={onReset}
+          className="absolute bottom-3 left-3 z-[600] inline-flex h-9 items-center gap-1.5 rounded-full bg-card px-3.5 text-sm font-semibold text-primary shadow-soft hover:bg-muted"
+        >
+          <Icon name="Undo2" fallback="RotateCcw" size={15} />
+          Весь район
+        </button>
+      )}
+      <span className="pointer-events-none absolute bottom-1 right-2 z-[500] text-[9px] text-primary/60">
+        © OpenStreetMap
+      </span>
     </div>
   );
 };

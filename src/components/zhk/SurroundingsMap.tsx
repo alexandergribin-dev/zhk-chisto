@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Icon from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 import type { Factor, Zhk } from "@/data/zhk";
@@ -30,6 +30,20 @@ const SurroundingsMap = ({ z }: { z: Zhk }) => {
   const [active, setActive] = useState<string>(z.factors[0]?.id ?? "");
   const cur = z.factors.find((f) => f.id === active);
   const [view, setView] = useState<"map" | "scheme">("map");
+  const mapRef = useRef<HTMLDivElement>(null);
+  const [picked, setPicked] = useState(false);
+  const [resetSignal, setResetSignal] = useState(0);
+  const choose = (id: string) => {
+    setActive(id);
+    setPicked(true);
+    if (view === "map" && window.matchMedia("(max-width: 1023px)").matches) {
+      mapRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  };
+  const resetMap = () => {
+    setPicked(false);
+    setResetSignal((n) => n + 1);
+  };
 
   return (
     <div className="grid gap-5 lg:grid-cols-[1.3fr_1fr]">
@@ -63,7 +77,15 @@ const SurroundingsMap = ({ z }: { z: Zhk }) => {
           ))}
         </div>
         {view === "map" ? (
-          <SurroundingsLeaflet z={z} />
+          <div ref={mapRef}>
+            <SurroundingsLeaflet
+              z={z}
+              factor={picked ? (cur ?? null) : null}
+              zoomTo={picked}
+              onReset={resetMap}
+              resetSignal={resetSignal}
+            />
+          </div>
         ) : (
           <div className="relative overflow-hidden rounded-xl bg-muted shadow-line">
             <svg
@@ -181,7 +203,7 @@ const SurroundingsMap = ({ z }: { z: Zhk }) => {
               return (
                 <button
                   key={f.id}
-                  onClick={() => setActive(f.id)}
+                  onClick={() => choose(f.id)}
                   style={{
                     left: `${(p.x / 400) * 100}%`,
                     top: `${(p.y / 400) * 100}%`,
@@ -229,10 +251,12 @@ const SurroundingsMap = ({ z }: { z: Zhk }) => {
           {z.factors.map((f) => (
             <li key={f.id}>
               <button
-                onClick={() => setActive(f.id)}
+                onClick={() => choose(f.id)}
                 className={cn(
                   "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors",
-                  active === f.id ? "bg-secondary" : "hover:bg-muted",
+                  active === f.id && (view === "scheme" || picked)
+                    ? "bg-secondary"
+                    : "hover:bg-muted",
                 )}
               >
                 <span
