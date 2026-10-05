@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Polygon, Polyline, CircleMarker, Circle, Tooltip } from "react-leaflet";
 
 export type LayerId = "metro" | "green" | "industry" | "roads";
+type FileId = LayerId | "green-detail";
 
 type Area = { n: string | null; ha: number; c: [number, number][][] };
 type Road = { n: string | null; c: [number, number][] };
@@ -20,10 +21,10 @@ const metroColors: Record<string, string> = {
   lime: "#a1b30a", teal: "#79cdcd", pink: "#de64a1", cyan: "#03795f",
 };
 
-const cache: Partial<Record<LayerId, Promise<unknown>>> = {};
-const load = <T,>(id: LayerId) => (cache[id] ??= fetch(`/geo/${id}.json`).then((r) => r.json())) as Promise<T>;
+const cache: Partial<Record<FileId, Promise<unknown>>> = {};
+const load = <T,>(id: FileId) => (cache[id] ??= fetch(`/geo/${id}.json`).then((r) => r.json())) as Promise<T>;
 
-const useLayer = <T,>(id: LayerId, on: boolean) => {
+const useLayer = <T,>(id: FileId, on: boolean) => {
   const [data, setData] = useState<T | null>(null);
   useEffect(() => {
     if (on && !data) load<T>(id).then(setData);
@@ -31,8 +32,15 @@ const useLayer = <T,>(id: LayerId, on: boolean) => {
   return on ? data : null;
 };
 
-const EcoLayers = ({ layers, focus }: { layers: LayerId[]; focus?: [number, number] | null }) => {
+const near = (c: [number, number][][], p: [number, number]) =>
+  Math.abs(c[0][0][0] - p[0]) < 0.03 && Math.abs(c[0][0][1] - p[1]) < 0.05;
+
+type Props = { layers: LayerId[]; focus?: [number, number] | null; detailAround?: [number, number] };
+
+const EcoLayers = ({ layers, focus, detailAround }: Props) => {
   const green = useLayer<Area[]>("green", layers.includes("green"));
+  const detailAll = useLayer<Area[]>("green-detail", !!detailAround && layers.includes("green"));
+  const detail = detailAround && detailAll ? detailAll.filter((a) => near(a.c, detailAround)) : null;
   const industry = useLayer<Area[]>("industry", layers.includes("industry"));
   const roads = useLayer<Road[]>("roads", layers.includes("roads"));
   const metro = useLayer<Station[]>("metro", layers.includes("metro"));
@@ -49,6 +57,11 @@ const EcoLayers = ({ layers, focus }: { layers: LayerId[]; focus?: [number, numb
       )}
       {green?.map((a, i) => (
         <Polygon key={`g${i}`} positions={a.c} pathOptions={{ stroke: false, fillColor: layerMeta.green.color, fillOpacity: 0.38 }}>
+          {a.n && <Tooltip sticky className="eco-tip">{a.n} · <span className="num">{a.ha.toLocaleString("ru-RU")}</span> га</Tooltip>}
+        </Polygon>
+      ))}
+      {detail?.map((a, i) => (
+        <Polygon key={`gd${i}`} positions={a.c} pathOptions={{ stroke: false, fillColor: layerMeta.green.color, fillOpacity: 0.38 }}>
           {a.n && <Tooltip sticky className="eco-tip">{a.n} · <span className="num">{a.ha.toLocaleString("ru-RU")}</span> га</Tooltip>}
         </Polygon>
       ))}
