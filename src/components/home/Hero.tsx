@@ -10,7 +10,8 @@ const Hero = () => {
   const [q, setQ] = useState("");
   const [active, setActive] = useState<(typeof collections)[number]["id"]>("clean12");
   const navigate = useNavigate();
-  const items = zhkList.filter((z) => inCollection(z, active)).slice(0, 3);
+  const matched = zhkList.filter((z) => inCollection(z, active));
+  const items = matched.slice(0, 3);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,7 +54,13 @@ const Hero = () => {
 
       <div className="h-[260px] animate-fade-in [animation-delay:120ms] sm:h-[320px] lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:h-auto lg:min-h-[420px]">
         <div className="relative h-full">
-          <EcoMap />
+          <EcoMap items={matched} fit />
+          <span
+            key={active}
+            className="pointer-events-none absolute left-14 top-3 z-[600] inline-flex h-10 animate-fade-in items-center rounded-full bg-primary/90 px-3.5 text-[0.82rem] font-medium text-white"
+          >
+            <b className="num mr-1">{matched.length}</b> ЖК на карте
+          </span>
           <Link
             to={`/novostroyki?vid=karta&podborka=${active}`}
             title={`Открыть подборку «${collections.find((c) => c.id === active)?.title}» на карте`}
