@@ -3,14 +3,14 @@ import { Link, useNavigate } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import ZhkCard from "@/components/ZhkCard";
 import EcoMap from "@/components/home/EcoMap";
-import { collections, zhkList } from "@/data/zhk";
+import { collections, inCollection, zhkList } from "@/data/zhk";
 import { cn } from "@/lib/utils";
 
 const Hero = () => {
   const [q, setQ] = useState("");
   const [active, setActive] = useState<(typeof collections)[number]["id"]>("clean12");
   const navigate = useNavigate();
-  const items = zhkList.filter((z) => (z.tags as string[]).includes(active)).slice(0, 3);
+  const items = zhkList.filter((z) => inCollection(z, active)).slice(0, 3);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,6 +66,7 @@ const Hero = () => {
                   active === c.id ? "bg-white text-primary" : "bg-white/10 text-white/85 hover:bg-white/20",
                 )}
               >
+                {c.id === "air" && <Icon name="Wind" size={13} className="-ml-0.5 mr-1 inline-block align-[-2px]" />}
                 {c.short}
               </button>
             </li>

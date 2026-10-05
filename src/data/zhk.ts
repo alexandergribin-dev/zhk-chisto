@@ -437,6 +437,7 @@ export const gradeText: Record<Grade, string> = {
 
 export const collections = [
   { id: "clean12", title: "Самые чистые ЖК до 12 млн", short: "Самые чистые до 12 млн", count: 48, chips: ["До 12 млн", "Эко A–B", "Сдача до 2028"] },
+  { id: "air", title: "Воздух с леса", short: "Воздух с леса", count: 0, chips: ["Ветер с леса, парка или воды"] },
   { id: "forest", title: "У леса", short: "У леса", count: 31, chips: ["Лес до 500 м", "Эко A–B"] },
   { id: "west", title: "С окнами на запад", short: "С окнами на запад", count: 67, chips: ["Окна на запад", "Вечернее солнце"] },
   { id: "reliable", title: "Надёжные застройщики", short: "Надёжные застройщики", count: 22, chips: ["Без переносов", "Данные ЕРЗ"] },
@@ -476,3 +477,6 @@ export const mainAirSource = (z: Zhk) => {
     label: `${plus ? "Воздух" : "Ветер"} с ${AIR_WORD[best.f.type]}`,
   };
 };
+
+export const inCollection = (z: Zhk, id: string) =>
+  id === "air" ? !!mainAirSource(z)?.plus : (z.tags as string[]).includes(id);
