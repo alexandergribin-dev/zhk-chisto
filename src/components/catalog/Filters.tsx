@@ -1,6 +1,7 @@
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
+import Icon from "@/components/ui/icon";
 import GradeBadge from "@/components/GradeBadge";
 import type { Grade } from "@/data/zhk";
 import { cn } from "@/lib/utils";
@@ -15,6 +16,7 @@ export type FilterState = {
   forest: boolean;
   west: boolean;
   reliable: boolean;
+  cleanAir: boolean;
 };
 
 export const defaultFilters: FilterState = {
@@ -27,6 +29,7 @@ export const defaultFilters: FilterState = {
   forest: false,
   west: false,
   reliable: false,
+  cleanAir: false,
 };
 
 export const OKRUGS = ["Москва", "МО"];
@@ -65,6 +68,24 @@ const Filters = ({ value, onChange }: { value: FilterState; onChange: (v: Filter
         </div>
         <p className="mt-2 text-xs leading-snug text-muted-foreground">A — рядом нет трасс и промзон, D — несколько факторов рядом</p>
       </Group>
+
+      <div className="border-b border-border py-4">
+        <label
+          className={cn(
+            "flex cursor-pointer items-center gap-3 rounded-xl p-3 transition-colors",
+            value.cleanAir ? "bg-grade-a/10 ring-1 ring-grade-a/40" : "bg-muted hover:bg-secondary",
+          )}
+        >
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-grade-a text-white">
+            <Icon name="Wind" size={17} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-semibold leading-tight">Воздух к окнам</span>
+            <span className="mt-0.5 block text-xs leading-snug text-muted-foreground">Чаще всего с леса, парка или воды</span>
+          </span>
+          <Switch checked={value.cleanAir} onCheckedChange={(v) => set({ cleanAir: v })} aria-label="Воздух к окнам с леса, парка или воды" />
+        </label>
+      </div>
 
       <Group title="Бюджет, млн ₽">
         <div className="num mb-3 flex justify-between text-sm">

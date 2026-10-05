@@ -7,7 +7,7 @@ import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import Icon from "@/components/ui/icon";
-import { collections, getDeveloper, zhkList, type Zhk } from "@/data/zhk";
+import { collections, getDeveloper, mainAirSource, zhkList, type Zhk } from "@/data/zhk";
 import { useSeo } from "@/hooks/use-seo";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +20,7 @@ const initialFrom = (podborka: string | null): FilterState => {
   if (podborka === "forest") return { ...f, forest: true };
   if (podborka === "west") return { ...f, west: true };
   if (podborka === "reliable") return { ...f, reliable: true };
+  if (podborka === "air") return { ...f, cleanAir: true };
   return f;
 };
 
@@ -45,6 +46,7 @@ const apply = (list: Zhk[], f: FilterState, q: string) =>
     if (f.forest && !z.tags.includes("forest")) return false;
     if (f.west && !z.tags.includes("west")) return false;
     if (f.reliable && !z.tags.includes("reliable")) return false;
+    if (f.cleanAir && !mainAirSource(z)?.plus) return false;
     return true;
   });
 
