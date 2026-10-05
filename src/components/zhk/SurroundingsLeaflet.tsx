@@ -57,13 +57,9 @@ const SurroundingsLeaflet = ({
     "roads",
     "metro",
   ]);
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const toggle = (id: LayerId) =>
     setLayers((l) => (l.includes(id) ? l.filter((x) => x !== id) : [...l, id]));
-
-  useEffect(() => {
-    if (window.matchMedia("(max-width: 767px)").matches) setOpen(false);
-  }, []);
 
   useEffect(() => {
     if (factor) setOpen(false);
