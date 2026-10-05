@@ -27,7 +27,7 @@ export const SubscribeButton = ({ className }: { className?: string }) => (
     to="/bot"
     onClick={() => reachGoal("bot_click")}
     className={cn(
-      "btn-action-shadow inline-flex h-11 items-center gap-2.5 rounded-[10px] bg-action px-5 text-[0.94rem] font-semibold text-action-foreground transition-transform hover:-translate-y-px",
+      "btn-action-shadow inline-flex h-10 items-center gap-2.5 rounded-full bg-action px-5 text-[0.94rem] font-semibold text-action-foreground transition-transform hover:-translate-y-px",
       className,
     )}
   >
@@ -43,9 +43,10 @@ const Header = () => {
   const isActive = (l: (typeof links)[number]) => (l.home ? pathname === "/" : pathname.startsWith(l.to));
 
   return (
-    <header className="relative z-20 flex h-16 items-center px-4 md:h-[72px] md:px-7">
+    <header className="relative z-20 mx-auto mt-3 flex h-16 max-w-[1280px] items-center px-4 md:px-10 lg:px-[56px]">
+      <div className="flex h-full w-full items-center rounded-2xl bg-card px-3 shadow-line md:px-5">
       <Logo />
-      <nav className="ml-12 hidden gap-2 lg:flex" aria-label="Основное">
+      <nav className="ml-10 hidden gap-1 lg:flex" aria-label="Основное">
         {links.map((l) => (
           <NavLink
             key={l.to}
@@ -63,7 +64,7 @@ const Header = () => {
         <span className="hidden text-[0.94rem] font-medium xl:inline">Новые квартиры — в Telegram</span>
         <SubscribeButton className="hidden sm:inline-flex" />
         <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger className="grid h-11 w-11 place-items-center rounded-lg bg-card shadow-line lg:hidden" aria-label="Меню">
+          <SheetTrigger className="grid h-10 w-10 place-items-center rounded-lg bg-muted lg:hidden" aria-label="Меню">
             <Icon name="Menu" size={20} />
           </SheetTrigger>
           <SheetContent side="right" className="w-[86vw] max-w-sm">
@@ -91,6 +92,7 @@ const Header = () => {
             </div>
           </SheetContent>
         </Sheet>
+      </div>
       </div>
     </header>
   );

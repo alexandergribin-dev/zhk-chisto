@@ -1,10 +1,56 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Icon from "@/components/ui/icon";
+import ZhkCard from "@/components/ZhkCard";
+import { gradeBg } from "@/components/GradeBadge";
+import { collections, zhkList } from "@/data/zhk";
+import { cn } from "@/lib/utils";
+
+const pins = [
+  [22, 30], [48, 20], [72, 28], [36, 55], [62, 46], [84, 56], [28, 76], [54, 72], [76, 80], [44, 36], [66, 64], [88, 30],
+];
+
+const EcoMap = () => (
+  <div className="dot-grid relative h-full overflow-hidden rounded-[22px] bg-primary">
+    <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0 62 C 25 55, 40 70, 60 58 S 90 40, 100 46" fill="none" stroke="hsl(0 0% 100% / .14)" strokeWidth="0.6" />
+      <path d="M30 0 C 34 30, 26 60, 40 100" fill="none" stroke="hsl(0 0% 100% / .1)" strokeWidth="0.5" />
+    </svg>
+    {zhkList.slice(0, pins.length).map((z, i) => (
+      <Link
+        key={z.slug}
+        to={`/zhk/${z.slug}`}
+        title={`${z.name} — оценка ${z.grade}`}
+        aria-label={`${z.name}, эко-оценка ${z.grade}`}
+        style={{ left: `${pins[i][0]}%`, top: `${pins[i][1]}%` }}
+        className="group absolute -translate-x-1/2 -translate-y-full"
+      >
+        <span
+          className={cn(
+            "grid h-7 w-7 -rotate-45 place-items-center rounded-full rounded-bl-none text-[11px] font-bold text-white ring-2 ring-white/90 transition-transform group-hover:scale-110",
+            gradeBg[z.grade],
+          )}
+        >
+          <span className="rotate-45">{z.grade}</span>
+        </span>
+      </Link>
+    ))}
+    <div className="absolute bottom-3 left-3 flex gap-2.5 rounded-lg bg-primary/85 px-2.5 py-1.5 text-[11px] font-medium text-white/90">
+      {(["A", "B", "C", "D"] as const).map((g) => (
+        <span key={g} className="flex items-center gap-1">
+          <i className={cn("h-2.5 w-2.5 rounded-full", gradeBg[g])} />
+          {g}
+        </span>
+      ))}
+    </div>
+  </div>
+);
 
 const Hero = () => {
   const [q, setQ] = useState("");
+  const [active, setActive] = useState<(typeof collections)[number]["id"]>("clean12");
   const navigate = useNavigate();
+  const items = zhkList.filter((z) => (z.tags as string[]).includes(active)).slice(0, 3);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -12,20 +58,20 @@ const Hero = () => {
   };
 
   return (
-    <section className="relative z-10 mx-auto grid max-w-[1280px] gap-8 px-4 pt-10 md:px-10 md:pt-20 lg:grid-cols-[1.35fr_1fr] lg:gap-10 lg:px-[84px] lg:pt-[110px]">
-      <h1 className="animate-fade-in text-[42px] font-semibold leading-[1.04] tracking-[-0.03em] text-primary sm:text-[56px] lg:-mt-1.5 lg:whitespace-nowrap lg:text-[56px] xl:text-[66px]">
-        Новостройки,
-        <br />
-        проверенные чисто.
-      </h1>
-      <div className="max-w-[500px] animate-fade-in pt-1 [animation-delay:120ms]">
-        <p className="text-[1.15rem] leading-[1.38] tracking-[-0.005em] md:text-[1.3rem]">
-          Проверяем экологию, сроки и реальную цену каждой новостройки Москвы и области.
-        </p>
+    <section
+      id="podborki"
+      className="relative z-10 mx-auto grid max-w-[1280px] scroll-mt-6 gap-4 px-4 pt-6 md:px-10 md:pt-8 lg:grid-cols-[1.05fr_1fr] lg:grid-rows-[auto_1fr_auto] lg:gap-5 lg:px-[56px]"
+    >
+      <div className="animate-fade-in lg:pr-4 lg:pt-6">
+        <h1 className="text-[40px] font-semibold leading-[1.02] tracking-[-0.035em] text-primary sm:text-[54px] xl:text-[64px]">
+          Новостройки,
+          <br />
+          проверенные чисто
+        </h1>
         <form
           onSubmit={submit}
           role="search"
-          className="shadow-soft mt-6 flex h-[58px] items-center gap-2.5 rounded-[14px] bg-card pl-4 pr-1.5"
+          className="shadow-soft mt-7 flex h-[56px] items-center gap-2.5 rounded-full bg-card pl-5 pr-1.5"
         >
           <Icon name="Search" size={18} className="shrink-0 text-muted-foreground" />
           <input
@@ -33,21 +79,69 @@ const Hero = () => {
             aria-label="Поиск"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            onFocus={() => {}}
             placeholder="Район, метро, ЖК или застройщик"
             className="min-w-0 flex-1 bg-transparent text-[0.98rem] outline-none placeholder:text-muted-foreground"
           />
-          <span className="ring-gradient rounded-[13px] p-[3px]">
-            <button
-              type="submit"
-              className="btn-action-shadow inline-flex h-10 items-center gap-2 rounded-[10px] bg-action px-4 text-[0.94rem] font-semibold text-action-foreground"
-            >
-              Найти
-              <Icon name="ArrowRight" size={15} />
-            </button>
-          </span>
+          <button
+            type="submit"
+            className="btn-action-shadow inline-flex h-11 shrink-0 items-center rounded-full bg-action px-5 text-[0.94rem] font-semibold text-action-foreground"
+          >
+            Найти
+          </button>
         </form>
-        <p className="mt-4 text-[0.92rem] text-muted-foreground">Без накруток агрегатора — цены от застройщика</p>
+      </div>
+
+      <div className="h-[260px] animate-fade-in [animation-delay:120ms] sm:h-[320px] lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:h-auto lg:min-h-[420px]">
+        <EcoMap />
+      </div>
+
+      <div className="dot-grid min-w-0 animate-fade-in lg:col-start-1 lg:row-span-2 lg:row-start-2 rounded-[22px] bg-primary p-3 [animation-delay:200ms] md:p-4">
+        <ul className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-3">
+          {collections.map((c) => (
+            <li key={c.id} className="shrink-0">
+              <button
+                onClick={() => setActive(c.id)}
+                className={cn(
+                  "whitespace-nowrap rounded-full px-3.5 py-1.5 text-[0.82rem] font-medium transition-colors",
+                  active === c.id ? "bg-white text-primary" : "bg-white/10 text-white/85 hover:bg-white/20",
+                )}
+              >
+                {c.short}
+              </button>
+            </li>
+          ))}
+        </ul>
+        <div key={active} className="grid animate-fade-in gap-2.5 sm:grid-cols-3">
+          {items.map((z) => (
+            <ZhkCard key={z.slug} z={z} />
+          ))}
+        </div>
+        <Link
+          to={`/novostroyki?podborka=${active}`}
+          className="mt-3 inline-flex items-center gap-1.5 px-1 text-sm font-semibold text-white/90 hover:text-white"
+        >
+          Вся подборка <Icon name="ArrowRight" size={14} />
+        </Link>
+      </div>
+
+      <div className="flex animate-fade-in flex-col justify-center gap-5 pb-1 pt-2 lg:col-start-2 lg:row-start-3 [animation-delay:260ms] lg:pl-4">
+        <p className="max-w-[440px] text-[1.1rem] leading-[1.4] md:text-[1.2rem]">
+          Проверяем экологию, сроки и реальную цену каждой новостройки Москвы и области.
+        </p>
+        <div className="flex flex-wrap gap-2.5">
+          <Link
+            to="/novostroyki"
+            className="inline-flex h-11 items-center rounded-full bg-primary px-5 text-[0.94rem] font-semibold text-primary-foreground transition-transform hover:-translate-y-px"
+          >
+            Смотреть все ЖК
+          </Link>
+          <Link
+            to="/kak-my-proveryaem"
+            className="inline-flex h-11 items-center rounded-full border border-primary/30 bg-card px-5 text-[0.94rem] font-semibold text-primary hover:border-primary"
+          >
+            Как считаем оценку
+          </Link>
+        </div>
       </div>
     </section>
   );
