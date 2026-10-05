@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Factor, Zhk } from "@/data/zhk";
+import { windDir, type Factor, type Zhk } from "@/data/zhk";
 import { cn } from "@/lib/utils";
 
 const C = 200;
@@ -14,7 +14,6 @@ const KIND_LABEL: Record<string, string> = {
 };
 const WATER = "hsl(200 55% 62%)";
 
-const dirOf = (angle: number) => Math.round((((angle % 360) + 360) % 360) / 45) % 8;
 const rad = (deg: number) => ((deg - 90) * Math.PI) / 180;
 const at = (deg: number, r: number) => ({ x: C + r * Math.cos(rad(deg)), y: C + r * Math.sin(rad(deg)) });
 const fmtDist = (m: number) => (m >= 1000 ? `${(m / 1000).toLocaleString("ru-RU")} км` : `${m} м`);
@@ -84,7 +83,7 @@ const AirFlow = ({ z }: { z: Zhk }) => {
 
   const placed = objects.map((f) => {
     const r = 105 + (Math.min(f.distance, 1500) / 1500) * 55;
-    return { f, r, p: at(f.angle, r), share: z.wind[dirOf(f.angle)] };
+    return { f, r, p: at(f.angle, r), share: z.wind[windDir(f.angle)] };
   });
   const sorted = [...placed].sort((a, b) => b.share - a.share);
   const top = sorted[0];

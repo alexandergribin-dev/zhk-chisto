@@ -450,3 +450,29 @@ export const fmtRub = (n: number) => n.toLocaleString("ru-RU") + " ₽";
 
 export const reliabilityText = (share: number) =>
   share === 0 ? "Сроки не переносились" : share <= 15 ? "Переносы случаются" : "У значительной части объёма сроки сдвинуты";
+
+const AIR_TYPES: Factor["type"][] = ["forest", "park", "water", "highway", "rail", "industry"];
+const AIR_WORD: Partial<Record<Factor["type"], string>> = {
+  forest: "леса",
+  park: "парка",
+  water: "воды",
+  highway: "трассы",
+  rail: "ж/д",
+  industry: "промзоны",
+};
+export const windDir = (angle: number) => Math.round((((angle % 360) + 360) % 360) / 45) % 8;
+
+export const mainAirSource = (z: Zhk) => {
+  const best = z.factors
+    .filter((f) => AIR_TYPES.includes(f.type))
+    .map((f) => ({ f, share: z.wind[windDir(f.angle)] }))
+    .sort((a, b) => b.share - a.share)[0];
+  if (!best) return null;
+  const plus = best.f.kind === "plus";
+  return {
+    plus,
+    share: best.share,
+    type: best.f.type,
+    label: `${plus ? "Воздух" : "Ветер"} с ${AIR_WORD[best.f.type]}`,
+  };
+};
