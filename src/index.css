@@ -263,3 +263,39 @@
 @keyframes eco-hl-pulse {
   50% { stroke-opacity: 0.35; fill-opacity: 0.1; }
 }
+
+.wind-stream {
+  stroke-dasharray: 16 8;
+  animation: wind-stream 1.4s linear infinite;
+}
+@keyframes wind-stream {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+.smoke-away {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: smoke-away 3s ease-out infinite;
+}
+@keyframes smoke-away {
+  0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
+  25% { opacity: 1; }
+  100% { transform: translate(26px, -22px) scale(1.6); opacity: 0; }
+}
+.leaf-fly {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: leaf-fly 3.2s ease-in-out infinite;
+  opacity: 0;
+}
+@keyframes leaf-fly {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { transform: translate(30px, -6px) rotate(220deg); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wind-stream, .wind-flow, .smoke, .smoke-up, .smoke-away, .leaf-fly { animation: none; }
+  .leaf-fly { opacity: 1; }
+}
