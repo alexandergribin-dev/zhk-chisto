@@ -4,7 +4,16 @@ export type Road = { n: string | null; c: LatLng[] };
 export type Station = { n: string; c: LatLng; col: string | null };
 export type Rail = { u: "m" | "b"; c: LatLng[] };
 export type RailStation = { n: string; c: LatLng; d: string[] };
+export type Water = {
+  n?: string;
+  k?: "res" | "pond" | "river";
+  ha: number;
+  c: LatLng[][];
+};
+export type River = { n?: string; c: LatLng[] };
 export type FileId =
+  | "water"
+  | "rivers"
   | "metro"
   | "green"
   | "industry"
@@ -71,7 +80,7 @@ export const areaDist = (p: LatLng, a: Area) =>
 const words = (s: string) =>
   s
     .toLowerCase()
-    .replace(/[«»"().,]/g, " ")
+    .replace(/[«»"().,-]/g, " ")
     .split(/\s+/)
     .filter(
       (w) =>
@@ -83,6 +92,9 @@ const words = (s: string) =>
           "улица",
           "промзона",
           "часть",
+          "река",
+          "канал",
+          "пруд",
           "южная",
           "северная",
           "западная",
@@ -246,6 +258,66 @@ export const findTarget = async (
     const all = geo.flat();
     if (!all.length) return fallback;
     return { kind: "line", geo, anchor: nearestPoint(home, all) };
+  }
+
+  if (f.type === "water") {
+    const [ws, rs] = await Promise.all([
+      loadGeo<Water[]>("water"),
+      loadGeo<River[]>("rivers"),
+    ]);
+    const lim = Math.max(f.distance * 2.5, f.distance + 1500);
+    const areas = ws
+      .filter(
+        (w) =>
+          Math.abs(w.c[0][0][0] - home[0]) < 0.3 &&
+          Math.abs(w.c[0][0][1] - home[1]) < 0.5,
+      )
+      .map((w) => ({ n: w.n ?? null, ha: w.ha, c: w.c }));
+    const named = best(
+      areas.filter((a) => nameScore(f.title, a.n) && areaDist(home, a) < lim),
+      (a) => areaDist(home, a) - Math.min(a.ha, 300),
+    );
+    if (named)
+      return {
+        kind: "area",
+        geo: named.item,
+        anchor: inRing(home, named.item.c[0])
+          ? home
+          : nearestPoint(home, named.item.c[0]),
+      };
+    const river = best(
+      rs.filter(
+        (r) => nameScore(f.title, r.n ?? null) && lineDist(home, r.c) < lim,
+      ),
+      (r) => lineDist(home, r.c),
+    );
+    if (river) {
+      const geo = clipLine(
+        river.item.c,
+        home,
+        Math.max(2500, river.score * 1.8),
+      );
+      const all = geo.flat();
+      if (all.length)
+        return { kind: "line", geo, anchor: nearestPoint(home, all) };
+    }
+    const geom = best(
+      areas.filter(
+        (a) =>
+          Math.abs(areaDist(home, a) - f.distance) <=
+          Math.max(300, f.distance * 0.6),
+      ),
+      (a) => areaDist(guess, a) - Math.min(a.ha, 100),
+    );
+    if (geom && geom.score < 1000)
+      return {
+        kind: "area",
+        geo: geom.item,
+        anchor: inRing(home, geom.item.c[0])
+          ? home
+          : nearestPoint(home, geom.item.c[0]),
+      };
+    return fallback;
   }
 
   if (f.type === "metro") {

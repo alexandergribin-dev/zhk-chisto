@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 
 const CATALOG_DEFAULT: LayerId[] = [
   "green",
+  "water",
   "industry",
   "roads",
   "rail",

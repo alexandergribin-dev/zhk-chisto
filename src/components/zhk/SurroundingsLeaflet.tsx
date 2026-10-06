@@ -26,6 +26,7 @@ const gradeVar = {
 
 const ZHK_DEFAULT: LayerId[] = [
   "green",
+  "water",
   "industry",
   "roads",
   "rail",

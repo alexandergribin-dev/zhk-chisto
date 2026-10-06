@@ -8,6 +8,8 @@ import {
   type Station,
   type Rail,
   type RailStation,
+  type River,
+  type Water,
 } from "@/components/map/geo";
 import {
   Polygon,
@@ -20,6 +22,7 @@ import {
 export type LayerId =
   | "metro"
   | "green"
+  | "water"
   | "industry"
   | "roads"
   | "rail"
@@ -32,6 +35,12 @@ export const layerMeta: Record<
     label: "Парки и леса",
     icon: "Trees",
     color: "#3f9d5a",
+    hint: "Плюс к оценке",
+  },
+  water: {
+    label: "Реки и водоёмы",
+    icon: "Waves",
+    color: "#0284c7",
     hint: "Плюс к оценке",
   },
   industry: {
@@ -83,6 +92,13 @@ const metroColors: Record<string, string> = {
   cyan: "#03795f",
 };
 
+const waterKind: Record<string, string> = {
+  res: "Водохранилище",
+  pond: "Пруд",
+  river: "Река",
+  other: "Водоём",
+};
+
 const mcdColors: Record<string, string> = {
   D1: "#ED9F2D",
   D2: "#DF477C",
@@ -119,6 +135,8 @@ const EcoLayers = ({ layers, focus, detailAround }: Props) => {
       ? detailAll.filter((a) => near(a.c, detailAround))
       : null;
   const industry = useLayer<Area[]>("industry", layers.includes("industry"));
+  const water = useLayer<Water[]>("water", layers.includes("water"));
+  const rivers = useLayer<River[]>("rivers", layers.includes("water"));
   const roads = useLayer<Road[]>("roads", layers.includes("roads"));
   const metro = useLayer<Station[]>("metro", layers.includes("metro"));
   const rail = useLayer<Rail[]>("rail", layers.includes("rail"));
@@ -179,6 +197,48 @@ const EcoLayers = ({ layers, focus, detailAround }: Props) => {
             </Tooltip>
           )}
         </Polygon>
+      ))}
+      {water?.map((w, i) => (
+        <Polygon
+          key={`w${i}`}
+          positions={w.c}
+          pathOptions={{
+            color: layerMeta.water.color,
+            weight: 1,
+            opacity: 0.7,
+            fillColor: layerMeta.water.color,
+            fillOpacity: 0.45,
+          }}
+        >
+          <Tooltip sticky className="eco-tip">
+            {w.n ?? waterKind[w.k ?? "other"]}
+            {w.ha >= 1 && (
+              <>
+                {" "}
+                · <span className="num">{w.ha.toLocaleString("ru-RU")}</span> га
+              </>
+            )}
+          </Tooltip>
+        </Polygon>
+      ))}
+      {rivers?.map((r, i) => (
+        <Polyline
+          key={`rv${i}`}
+          positions={r.c}
+          pathOptions={{
+            color: layerMeta.water.color,
+            weight: 2.5,
+            opacity: 0.85,
+            lineCap: "round",
+            lineJoin: "round",
+          }}
+        >
+          {r.n && (
+            <Tooltip sticky className="eco-tip">
+              {r.n}
+            </Tooltip>
+          )}
+        </Polyline>
       ))}
       {industry?.map((a, i) => (
         <Polygon
