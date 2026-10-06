@@ -12,6 +12,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import EcoLayers, { type LayerId } from "@/components/map/EcoLayers";
 import LayersPanel from "@/components/map/LayersPanel";
+import useStoredLayers from "@/components/map/useStoredLayers";
 import FactorHighlight from "@/components/map/FactorHighlight";
 import type { Factor, Zhk } from "@/data/zhk";
 
@@ -21,6 +22,8 @@ const gradeVar = {
   C: "--grade-c",
   D: "--grade-d",
 } as const;
+
+const ZHK_DEFAULT: LayerId[] = ["green", "industry", "roads", "metro"];
 
 const ResetView = ({
   center,
@@ -51,15 +54,8 @@ const SurroundingsLeaflet = ({
   onReset,
   resetSignal = 0,
 }: Props) => {
-  const [layers, setLayers] = useState<LayerId[]>([
-    "green",
-    "industry",
-    "roads",
-    "metro",
-  ]);
+  const [layers, toggle] = useStoredLayers("zhk", ZHK_DEFAULT);
   const [open, setOpen] = useState(false);
-  const toggle = (id: LayerId) =>
-    setLayers((l) => (l.includes(id) ? l.filter((x) => x !== id) : [...l, id]));
 
   useEffect(() => {
     if (factor) setOpen(false);

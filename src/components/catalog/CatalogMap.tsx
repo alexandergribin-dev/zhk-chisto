@@ -3,21 +3,18 @@ import { Link } from "react-router-dom";
 import EcoMap from "@/components/home/EcoMap";
 import EcoLayers, { type LayerId } from "@/components/map/EcoLayers";
 import LayersPanel from "@/components/map/LayersPanel";
+import useStoredLayers from "@/components/map/useStoredLayers";
 import Icon from "@/components/ui/icon";
 import ZhkCard from "@/components/ZhkCard";
 import GradeBadge from "@/components/GradeBadge";
 import { fmtMln, type Zhk } from "@/data/zhk";
 import { cn } from "@/lib/utils";
 
+const CATALOG_DEFAULT: LayerId[] = ["green", "industry", "roads"];
+
 const CatalogMap = ({ items }: { items: Zhk[] }) => {
-  const [layers, setLayers] = useState<LayerId[]>([
-    "green",
-    "industry",
-    "roads",
-  ]);
+  const [layers, toggle] = useStoredLayers("catalog", CATALOG_DEFAULT);
   const [panelOpen, setPanelOpen] = useState(false);
-  const toggle = (id: LayerId) =>
-    setLayers((l) => (l.includes(id) ? l.filter((x) => x !== id) : [...l, id]));
   const [selected, setSelected] = useState<string | null>(
     items[0]?.slug ?? null,
   );
