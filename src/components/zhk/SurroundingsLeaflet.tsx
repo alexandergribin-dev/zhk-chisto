@@ -12,6 +12,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import EcoLayers, { type LayerId } from "@/components/map/EcoLayers";
 import LayersPanel from "@/components/map/LayersPanel";
+import NoiseStatus from "@/components/map/NoiseStatus";
 import useStoredLayers from "@/components/map/useStoredLayers";
 import FactorHighlight from "@/components/map/FactorHighlight";
 import type { Factor, Zhk } from "@/data/zhk";
@@ -23,7 +24,14 @@ const gradeVar = {
   D: "--grade-d",
 } as const;
 
-const ZHK_DEFAULT: LayerId[] = ["green", "industry", "roads", "rail", "metro"];
+const ZHK_DEFAULT: LayerId[] = [
+  "green",
+  "industry",
+  "roads",
+  "rail",
+  "noise",
+  "metro",
+];
 
 const ResetView = ({
   center,
@@ -124,6 +132,12 @@ const SurroundingsLeaflet = ({
         radiusNote="Круги — 300 м и 1 км от дома"
         className="absolute left-14 top-3 z-[600]"
       />
+      {layers.includes("noise") && (
+        <NoiseStatus
+          home={z.coords}
+          className="absolute right-3 top-3 z-[600] max-w-[min(240px,calc(100%-8rem))]"
+        />
+      )}
       {factor && onReset && (
         <button
           onClick={onReset}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import NoiseZones from "@/components/map/NoiseZones";
 import {
   loadGeo,
   type Area,
@@ -16,7 +17,13 @@ import {
   Tooltip,
 } from "react-leaflet";
 
-export type LayerId = "metro" | "green" | "industry" | "roads" | "rail";
+export type LayerId =
+  | "metro"
+  | "green"
+  | "industry"
+  | "roads"
+  | "rail"
+  | "noise";
 export const layerMeta: Record<
   LayerId,
   { label: string; icon: string; color: string; hint: string }
@@ -44,6 +51,12 @@ export const layerMeta: Record<
     icon: "TrainFront",
     color: "#7c3aed",
     hint: "Шум · МЦД и электрички",
+  },
+  noise: {
+    label: "Зоны шума",
+    icon: "Volume2",
+    color: "#e11d48",
+    hint: "100 и 300 м от трасс и ж/д",
   },
   metro: {
     label: "Станции метро",
@@ -116,6 +129,7 @@ const EcoLayers = ({ layers, focus, detailAround }: Props) => {
 
   return (
     <>
+      {layers.includes("noise") && <NoiseZones />}
       {focus && layers.length > 0 && (
         <Circle
           center={focus}

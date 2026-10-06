@@ -152,6 +152,24 @@ const LayersPanel = ({
               </li>
             );
           })}
+          {layers.includes("noise") && (
+            <li className="flex items-center gap-3 px-2 pt-1 text-[0.7rem] text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <span
+                  className="h-2.5 w-3.5 rounded-sm"
+                  style={{ background: "rgba(225,29,72,0.42)" }}
+                />
+                до 100 м
+              </span>
+              <span className="flex items-center gap-1">
+                <span
+                  className="h-2.5 w-3.5 rounded-sm"
+                  style={{ background: "rgba(225,29,72,0.16)" }}
+                />
+                до 300 м
+              </span>
+            </li>
+          )}
           {layers.length > 0 && (
             <li className="flex items-center gap-1.5 px-2 pt-1 text-[0.7rem] text-muted-foreground">
               <span className="h-2.5 w-2.5 shrink-0 rounded-full border border-dashed border-primary" />

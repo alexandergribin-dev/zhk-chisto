@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import EcoMap from "@/components/home/EcoMap";
 import EcoLayers, { type LayerId } from "@/components/map/EcoLayers";
 import LayersPanel from "@/components/map/LayersPanel";
+import NoiseStatus from "@/components/map/NoiseStatus";
 import useStoredLayers from "@/components/map/useStoredLayers";
 import Icon from "@/components/ui/icon";
 import ZhkCard from "@/components/ZhkCard";
@@ -10,7 +11,13 @@ import GradeBadge from "@/components/GradeBadge";
 import { fmtMln, type Zhk } from "@/data/zhk";
 import { cn } from "@/lib/utils";
 
-const CATALOG_DEFAULT: LayerId[] = ["green", "industry", "roads", "rail"];
+const CATALOG_DEFAULT: LayerId[] = [
+  "green",
+  "industry",
+  "roads",
+  "rail",
+  "noise",
+];
 
 const CatalogMap = ({ items }: { items: Zhk[] }) => {
   const [layers, toggle] = useStoredLayers("catalog", CATALOG_DEFAULT);
@@ -52,6 +59,13 @@ const CatalogMap = ({ items }: { items: Zhk[] }) => {
           onOpenChange={setPanelOpen}
           className="absolute left-14 top-3 z-[600]"
         />
+        {cur && layers.includes("noise") && (
+          <NoiseStatus
+            key={"n" + cur.slug}
+            home={cur.coords}
+            className="absolute right-3 top-3 z-[600] hidden max-w-[240px] sm:block"
+          />
+        )}
         {cur && (
           <Link
             key={cur.slug}
