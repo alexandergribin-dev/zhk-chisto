@@ -10,7 +10,7 @@ import GradeBadge from "@/components/GradeBadge";
 import { fmtMln, type Zhk } from "@/data/zhk";
 import { cn } from "@/lib/utils";
 
-const CATALOG_DEFAULT: LayerId[] = ["green", "industry", "roads"];
+const CATALOG_DEFAULT: LayerId[] = ["green", "industry", "roads", "rail"];
 
 const CatalogMap = ({ items }: { items: Zhk[] }) => {
   const [layers, toggle] = useStoredLayers("catalog", CATALOG_DEFAULT);

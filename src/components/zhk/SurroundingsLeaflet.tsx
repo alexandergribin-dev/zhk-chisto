@@ -23,7 +23,7 @@ const gradeVar = {
   D: "--grade-d",
 } as const;
 
-const ZHK_DEFAULT: LayerId[] = ["green", "industry", "roads", "metro"];
+const ZHK_DEFAULT: LayerId[] = ["green", "industry", "roads", "rail", "metro"];
 
 const ResetView = ({
   center,

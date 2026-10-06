@@ -11,7 +11,8 @@ import type { Factor } from "@/data/zhk";
 import { findTarget, type LatLng, type Target } from "@/components/map/geo";
 
 const KX = Math.cos((55.75 * Math.PI) / 180) * 111320;
-const dist = (a: LatLng, b: LatLng) => Math.hypot((a[0] - b[0]) * 111320, (a[1] - b[1]) * KX);
+const dist = (a: LatLng, b: LatLng) =>
+  Math.hypot((a[0] - b[0]) * 111320, (a[1] - b[1]) * KX);
 
 const FactorHighlight = ({
   factor,

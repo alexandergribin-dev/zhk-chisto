@@ -2,7 +2,16 @@ export type LatLng = [number, number];
 export type Area = { n: string | null; ha: number; c: LatLng[][] };
 export type Road = { n: string | null; c: LatLng[] };
 export type Station = { n: string; c: LatLng; col: string | null };
-export type FileId = "metro" | "green" | "industry" | "roads" | "green-detail";
+export type Rail = { u: "m" | "b"; c: LatLng[] };
+export type RailStation = { n: string; c: LatLng; d: string[] };
+export type FileId =
+  | "metro"
+  | "green"
+  | "industry"
+  | "roads"
+  | "green-detail"
+  | "rail"
+  | "rail-stations";
 
 const cache: Partial<Record<FileId, Promise<unknown>>> = {};
 export const loadGeo = <T>(id: FileId) =>
@@ -67,7 +76,23 @@ const words = (s: string) =>
     .filter(
       (w) =>
         w.length > 3 &&
-        !["шоссе", "парк", "лесопарк", "улица", "промзона", "часть", "южная", "северная", "западная", "восточная", "массив", "вдоль", "трасса", "станция", "склады"].includes(w),
+        ![
+          "шоссе",
+          "парк",
+          "лесопарк",
+          "улица",
+          "промзона",
+          "часть",
+          "южная",
+          "северная",
+          "западная",
+          "восточная",
+          "массив",
+          "вдоль",
+          "трасса",
+          "станция",
+          "склады",
+        ].includes(w),
     );
 
 export const nameScore = (title: string, name: string | null) => {
@@ -80,14 +105,20 @@ export const nameScore = (title: string, name: string | null) => {
     : 0;
 };
 
-const dist = (a: LatLng, b: LatLng) => Math.hypot((a[0] - b[0]) * KY, (a[1] - b[1]) * KX);
+const dist = (a: LatLng, b: LatLng) =>
+  Math.hypot((a[0] - b[0]) * KY, (a[1] - b[1]) * KX);
 
 export type Target =
   | { kind: "area"; geo: Area; anchor: LatLng }
   | { kind: "line"; geo: LatLng[][]; anchor: LatLng }
   | { kind: "point"; geo: LatLng; anchor: LatLng; approx: boolean };
 
-type FactorLike = { type: string; title: string; distance: number; angle: number };
+type FactorLike = {
+  type: string;
+  title: string;
+  distance: number;
+  angle: number;
+};
 
 const best = <T>(items: T[], score: (x: T) => number) => {
   let b: T | null = null;
@@ -102,7 +133,8 @@ const best = <T>(items: T[], score: (x: T) => number) => {
   return b ? { item: b, score: bs } : null;
 };
 
-const nearestPoint = (p: LatLng, pts: LatLng[]) => pts.reduce((b, c) => (dist(p, c) < dist(p, b) ? c : b), pts[0]);
+const nearestPoint = (p: LatLng, pts: LatLng[]) =>
+  pts.reduce((b, c) => (dist(p, c) < dist(p, b) ? c : b), pts[0]);
 
 const clipLine = (line: LatLng[], center: LatLng, radius: number) => {
   const runs: LatLng[][] = [];
@@ -121,13 +153,27 @@ const clipLine = (line: LatLng[], center: LatLng, radius: number) => {
   return runs;
 };
 
-export const findTarget = async (f: FactorLike, home: LatLng): Promise<Target> => {
+export const findTarget = async (
+  f: FactorLike,
+  home: LatLng,
+): Promise<Target> => {
   const guess = offset(home, f.angle, f.distance);
-  const fallback: Target = { kind: "point", geo: guess, anchor: guess, approx: true };
+  const fallback: Target = {
+    kind: "point",
+    geo: guess,
+    anchor: guess,
+    approx: true,
+  };
 
   if (f.type === "highway") {
-    const roads = (await loadGeo<Road[]>("roads")).filter((r) => lineDist(home, r.c) < Math.max(f.distance * 2.5, f.distance + 2500));
-    const named = best(roads.filter((r) => nameScore(f.title, r.n)), (r) => lineDist(home, r.c));
+    const roads = (await loadGeo<Road[]>("roads")).filter(
+      (r) =>
+        lineDist(home, r.c) < Math.max(f.distance * 2.5, f.distance + 2500),
+    );
+    const named = best(
+      roads.filter((r) => nameScore(f.title, r.n)),
+      (r) => lineDist(home, r.c),
+    );
     const geom = best(roads, (r) => lineDist(guess, r.c));
     const pick = named?.item ?? (geom && geom.score <= 600 ? geom.item : null);
     if (!pick) return fallback;
@@ -140,28 +186,80 @@ export const findTarget = async (f: FactorLike, home: LatLng): Promise<Target> =
   }
 
   if (f.type === "forest" || f.type === "park" || f.type === "industry") {
-    const ids: FileId[] = f.type === "industry" ? ["industry"] : ["green", "green-detail"];
+    const ids: FileId[] =
+      f.type === "industry" ? ["industry"] : ["green", "green-detail"];
     const sets = await Promise.all(ids.map((id) => loadGeo<Area[]>(id)));
-    const areas = sets.flat().filter((a) => Math.abs(a.c[0][0][0] - home[0]) < 0.3 && Math.abs(a.c[0][0][1] - home[1]) < 0.5);
+    const areas = sets
+      .flat()
+      .filter(
+        (a) =>
+          Math.abs(a.c[0][0][0] - home[0]) < 0.3 &&
+          Math.abs(a.c[0][0][1] - home[1]) < 0.5,
+      );
     const named = best(
-      areas.filter((a) => nameScore(f.title, a.n) && areaDist(home, a) < Math.max(f.distance * 2.5, f.distance + 1500)),
+      areas.filter(
+        (a) =>
+          nameScore(f.title, a.n) &&
+          areaDist(home, a) < Math.max(f.distance * 2.5, f.distance + 1500),
+      ),
       (a) => areaDist(home, a) - Math.min(a.ha, 500),
     );
     const minHa = f.type === "industry" ? 3 : f.type === "forest" ? 8 : 3;
     const tol = Math.max(300, f.distance * 0.6);
     const geom = best(
-      areas.filter((a) => a.ha >= minHa && Math.abs(areaDist(home, a) - f.distance) <= tol && areaDist(guess, a) < 1500),
-      (a) => Math.abs(areaDist(home, a) - f.distance) + areaDist(guess, a) * 0.5 - Math.min(a.ha, 300),
+      areas.filter(
+        (a) =>
+          a.ha >= minHa &&
+          Math.abs(areaDist(home, a) - f.distance) <= tol &&
+          areaDist(guess, a) < 1500,
+      ),
+      (a) =>
+        Math.abs(areaDist(home, a) - f.distance) +
+        areaDist(guess, a) * 0.5 -
+        Math.min(a.ha, 300),
     );
-    const pick = named?.item ?? (geom?.item ?? null);
+    const pick = named?.item ?? geom?.item ?? null;
     if (!pick) return fallback;
-    return { kind: "area", geo: pick, anchor: inRing(home, pick.c[0]) ? home : nearestPoint(home, pick.c[0]) };
+    return {
+      kind: "area",
+      geo: pick,
+      anchor: inRing(home, pick.c[0]) ? home : nearestPoint(home, pick.c[0]),
+    };
+  }
+
+  if (f.type === "rail") {
+    const rails = (await loadGeo<Rail[]>("rail")).filter(
+      (r) =>
+        lineDist(home, r.c) < Math.max(f.distance * 2.5, f.distance + 2500),
+    );
+    const b = best(
+      rails,
+      (r) =>
+        Math.abs(lineDist(home, r.c) - f.distance) + lineDist(guess, r.c) * 0.5,
+    );
+    if (!b || b.score > 900) return fallback;
+    const geo = clipLine(
+      b.item.c,
+      home,
+      Math.max(2500, lineDist(home, b.item.c) * 1.8),
+    );
+    const all = geo.flat();
+    if (!all.length) return fallback;
+    return { kind: "line", geo, anchor: nearestPoint(home, all) };
   }
 
   if (f.type === "metro") {
-    const st = await loadGeo<Station[]>("metro");
-    const b = best(st, (s) => dist(guess, s.c) - nameScore(f.title, s.n) * 1500);
-    return b && b.score <= 1500 ? { kind: "point", geo: b.item.c, anchor: b.item.c, approx: false } : fallback;
+    const isRail = /мцд|мцк|платформ|электрич|ж\/д/i.test(f.title);
+    const pts: { n: string; c: LatLng }[] = isRail
+      ? await loadGeo<RailStation[]>("rail-stations")
+      : await loadGeo<Station[]>("metro");
+    const b = best(
+      pts,
+      (s) => dist(guess, s.c) - nameScore(f.title, s.n) * 1500,
+    );
+    return b && b.score <= 1500
+      ? { kind: "point", geo: b.item.c, anchor: b.item.c, approx: false }
+      : fallback;
   }
 
   return fallback;

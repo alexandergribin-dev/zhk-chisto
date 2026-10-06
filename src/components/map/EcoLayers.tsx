@@ -5,6 +5,8 @@ import {
   type FileId,
   type Road,
   type Station,
+  type Rail,
+  type RailStation,
 } from "@/components/map/geo";
 import {
   Polygon,
@@ -14,7 +16,7 @@ import {
   Tooltip,
 } from "react-leaflet";
 
-export type LayerId = "metro" | "green" | "industry" | "roads";
+export type LayerId = "metro" | "green" | "industry" | "roads" | "rail";
 export const layerMeta: Record<
   LayerId,
   { label: string; icon: string; color: string; hint: string }
@@ -36,6 +38,12 @@ export const layerMeta: Record<
     icon: "Route",
     color: "#dc2626",
     hint: "Минус к оценке",
+  },
+  rail: {
+    label: "Железные дороги",
+    icon: "TrainFront",
+    color: "#7c3aed",
+    hint: "Шум · МЦД и электрички",
   },
   metro: {
     label: "Станции метро",
@@ -60,6 +68,14 @@ const metroColors: Record<string, string> = {
   teal: "#79cdcd",
   pink: "#de64a1",
   cyan: "#03795f",
+};
+
+const mcdColors: Record<string, string> = {
+  D1: "#ED9F2D",
+  D2: "#DF477C",
+  D3: "#E15D29",
+  D4: "#3FB485",
+  D5: "#8BC34A",
 };
 
 const useLayer = <T,>(id: FileId, on: boolean) => {
@@ -92,6 +108,11 @@ const EcoLayers = ({ layers, focus, detailAround }: Props) => {
   const industry = useLayer<Area[]>("industry", layers.includes("industry"));
   const roads = useLayer<Road[]>("roads", layers.includes("roads"));
   const metro = useLayer<Station[]>("metro", layers.includes("metro"));
+  const rail = useLayer<Rail[]>("rail", layers.includes("rail"));
+  const railSt = useLayer<RailStation[]>(
+    "rail-stations",
+    layers.includes("rail"),
+  );
 
   return (
     <>
@@ -180,6 +201,49 @@ const EcoLayers = ({ layers, focus, detailAround }: Props) => {
           )}
         </Polyline>
       ))}
+      {rail?.map((r, i) => (
+        <Polyline
+          key={`rw${i}`}
+          positions={r.c}
+          interactive={false}
+          pathOptions={{
+            color: layerMeta.rail.color,
+            weight: r.u === "m" ? 4 : 2.5,
+            opacity: 0.8,
+            dashArray: r.u === "m" ? undefined : "6 5",
+            lineCap: "butt",
+          }}
+        />
+      ))}
+      {railSt?.map((s, i) => {
+        const mcd = s.d.length > 0;
+        return (
+          <CircleMarker
+            key={`rs${i}`}
+            center={s.c}
+            radius={mcd ? 5 : 3.5}
+            pathOptions={{
+              color: mcd ? "#fff" : layerMeta.rail.color,
+              weight: mcd ? 2 : 1.5,
+              fillColor: mcd
+                ? (mcdColors[s.d[0]] ?? layerMeta.rail.color)
+                : "#fff",
+              fillOpacity: 1,
+            }}
+          >
+            <Tooltip direction="top" className="eco-tip">
+              {mcd ? (
+                <>
+                  <b>{s.d.map((d) => d.replace("D", "МЦД-")).join(", ")}</b> ·{" "}
+                  {s.n}
+                </>
+              ) : (
+                <>Платформа {s.n}</>
+              )}
+            </Tooltip>
+          </CircleMarker>
+        );
+      })}
       {metro?.map((s, i) => (
         <CircleMarker
           key={`m${i}`}

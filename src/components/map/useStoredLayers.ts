@@ -9,8 +9,14 @@ const read = (key: string, fallback: LayerId[]): LayerId[] => {
     const raw = localStorage.getItem(PREFIX + key);
     if (raw === null) return fallback;
     const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return fallback;
-    return valid.filter((id) => parsed.includes(id));
+    const on: unknown[] = Array.isArray(parsed) ? parsed : parsed?.on;
+    if (!Array.isArray(on)) return fallback;
+    const known: unknown[] = Array.isArray(parsed?.known)
+      ? parsed.known
+      : ["green", "industry", "roads", "metro"];
+    return valid.filter((id) =>
+      known.includes(id) ? on.includes(id) : fallback.includes(id),
+    );
   } catch {
     return fallback;
   }
@@ -21,7 +27,10 @@ const useStoredLayers = (key: string, fallback: LayerId[]) => {
 
   useEffect(() => {
     try {
-      localStorage.setItem(PREFIX + key, JSON.stringify(layers));
+      localStorage.setItem(
+        PREFIX + key,
+        JSON.stringify({ on: layers, known: valid }),
+      );
     } catch {
       /* хранилище недоступно — просто не запоминаем */
     }
